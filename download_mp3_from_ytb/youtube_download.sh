@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
 
+PROCESSOR=10
 FFMPEG_LOCATION=ffmpeg/bin/ffmpeg.exe
 PROXY="socks5://127.0.0.1:7890"
 url="https://www.youtube.com/watch?v=gn64M16gl2E&list=PL61FGHPfT-kBZi18paeyzM1RPrkD1tItG"
+download_archive=archive.txt
 
 if [ $(uname -s | grep -c "MINGW") -ne 0 ]; then
     OS="Win"
@@ -24,38 +26,64 @@ install_dependence() {
             ls -d ffmpeg*/ | cut -f1 -d'/' | xargs -I '{}' mv '{}' ffmpeg
         fi
     else
+        FFMPEG_LOCATION=""
         sudo apt install -y ffmpeg
     fi
 }
 
-download_mp3() {
-    counter=1
-    count_limt=1
-    while true; do
-        EXIT_CODE=0
-        if [ $OS == "Win" ]; then
-            youtube-dl --proxy $PROXY \
-                --download-archive archive.txt \
-                --extract-audio --embed-thumbnail --audio-format mp3 \
-                -o "mp3/%(title)s.%(ext)s" \
-                --ffmpeg-location $FFMPEG_LOCATION \
-                $url || EXIT_CODE=$?
-        else
-            youtube-dl --proxy $PROXY \
-                --download-archive archive.txt \
-                --extract-audio --embed-thumbnail --audio-format mp3 \
-                -o "mp3/%(title)s.%(ext)s" \
-                $url || EXIT_CODE=$?
-        fi
+download() {
+    playlist_length=$(youtube-dl --proxy "$PROXY" -J --flat-playlist "$url" | python -c 'import json,sys;obj=json.load(sys.stdin);print(len(obj["entries"]))')
 
-        if [ ! $EXIT_CODE -eq 0 ]; then
-            counter=$((counter + 1))
-            if [[ "$counter" -gt "$count_limt" ]]; then
-                exit 0
-            fi
+    internal=$(("$playlist_length" / "$PROCESSOR"))
+    for ((start = 1; start <= playlist_length; start++)); do
+        end=$((start + internal))
+        if [ $end -gt $playlist_length ]; then
+            end=$playlist_length
         fi
+        download_mp3 "$start-$end" &
+        pids[${start}]=$!
+        start=$end
+    done
+
+    # wait for all pids
+    for pid in ${pids[*]}; do
+        wait $pid
     done
 }
 
-install_dependence
-download_mp3
+download_mp3() {
+    counter=1
+    error_limt=5
+
+    playlist_items="$1"
+    echo "Download $playlist_items"
+    while true; do
+        EXIT_CODE=0
+        youtube-dl --proxy $PROXY \
+            --download-archive $download_archive \
+            --extract-audio --embed-thumbnail --audio-format mp3 \
+            -o "mp3/%(title)s.%(ext)s" \
+            --playlist-items "$playlist_items" \
+            --ffmpeg-location "$FFMPEG_LOCATION" \
+            "$url" || EXIT_CODE=$?
+
+        if [ ! $EXIT_CODE -eq 0 ]; then
+            counter=$((counter + 1))
+            echo "$counter" >>log.txt
+            if [[ "$counter" -gt "$error_limt" ]]; then
+                exit 0
+            fi
+        else
+            exit 0
+        fi
+    done
+    echo "DONE"
+}
+
+main() {
+    trap exit 0 SIGINT
+    install_dependence
+    download
+}
+
+main
