@@ -26,7 +26,7 @@ install_dependence() {
             ls -d ffmpeg*/ | cut -f1 -d'/' | xargs -I '{}' mv '{}' ffmpeg
         fi
     else
-        FFMPEG_LOCATION=""
+        FFMPEG_LOCATION=$(which ffmpeg)
         sudo apt install -y ffmpeg
     fi
 }
@@ -80,8 +80,15 @@ download_mp3() {
     echo "DONE"
 }
 
+exit_all() {
+    for pid in ${pids[*]}; do
+        kill -9 $pid
+    done
+    exit 0
+}
+
 main() {
-    trap exit 0 SIGINT
+    trap exit_all SIGINT
     install_dependence
     download
 }
