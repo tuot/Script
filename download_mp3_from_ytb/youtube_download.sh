@@ -80,15 +80,8 @@ download_mp3() {
     echo "DONE"
 }
 
-exit_all() {
-    for pid in ${pids[*]}; do
-        kill -9 $pid
-    done
-    exit 0
-}
-
 main() {
-    trap exit_all SIGINT
+    trap 'trap - SIGTERM && kill -- -$$' SIGINT SIGTERM EXIT
     install_dependence
     download
 }
