@@ -1,10 +1,9 @@
 #!/bin/bash
 set -e
 
-PROCESSOR=10
+PROCESSOR=5
 FFMPEG_LOCATION=ffmpeg/bin/ffmpeg.exe
 PROXY="socks5://127.0.0.1:7890"
-url="https://www.youtube.com/watch?v=gn64M16gl2E&list=PL61FGHPfT-kBZi18paeyzM1RPrkD1tItG"
 download_archive=archive.txt
 
 if [ $(uname -s | grep -c "MINGW") -ne 0 ]; then
@@ -32,7 +31,7 @@ install_dependence() {
 }
 
 download() {
-    playlist_length=$(youtube-dl --proxy "$PROXY" -J --flat-playlist "$url" | python -c 'import json,sys;obj=json.load(sys.stdin);print(len(obj["entries"]))')
+    playlist_length=$(youtube-dl --proxy "$PROXY" -J --flat-playlist "$URL" | python -c 'import json,sys;obj=json.load(sys.stdin);print(len(obj["entries"]))')
 
     internal=$(("$playlist_length" / "$PROCESSOR"))
     for ((start = 1; start <= playlist_length; start++)); do
@@ -65,7 +64,7 @@ download_mp3() {
             -o "mp3/%(title)s.%(ext)s" \
             --playlist-items "$playlist_items" \
             --ffmpeg-location "$FFMPEG_LOCATION" \
-            "$url" || EXIT_CODE=$?
+            "$URL" || EXIT_CODE=$?
 
         if [ ! $EXIT_CODE -eq 0 ]; then
             counter=$((counter + 1))
@@ -82,8 +81,11 @@ download_mp3() {
 
 main() {
     trap 'trap - SIGTERM && kill -- -$$' SIGINT SIGTERM EXIT
+    
+    URL="$1"
+    echo "Url is : $URL"
     install_dependence
     download
 }
 
-main
+main "$@"
