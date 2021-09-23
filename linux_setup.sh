@@ -10,6 +10,10 @@ pip_setup() {
     # pip3:
     # curl -O https://bootstrap.pypa.io/get-pip.py | python
 
+    if [ -d "${HOME}/miniconda3/" ]; then
+        source "${HOME}/miniconda3/bin/activate" base
+    fi
+
     pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
     pip config set global.trusted-host mirrors.aliyun.com
 }
@@ -21,16 +25,16 @@ install_docker() {
 
         sudo mkdir -p /etc/docker
         sudo tee /etc/docker/daemon.json <<-EOF
-    {
-        "registry-mirrors": [
-            "https://oq1auek6.mirror.aliyuncs.com",
-            "https://hub-mirror.c.163.com",
-            "https://mirror.baidubce.com"
-        ],
-        "insecure-registries": [
-            "192.168.1.229"
-        ]
-    }
+{
+    "registry-mirrors": [
+        "https://oq1auek6.mirror.aliyuncs.com",
+        "https://hub-mirror.c.163.com",
+        "https://mirror.baidubce.com"
+    ],
+    "insecure-registries": [
+        "192.168.1.229"
+    ]
+}
 EOF
 
         sudo getent group docker || groupadd docker
@@ -51,7 +55,7 @@ install_tmux() {
     sudo apt install -y tmux
     if [ ! -d "${HOME}/.tmux" ]; then
         cd
-        git clone https://github.com/gpakosz/.tmux.git
+        git clone --depth=1 https://github.com/gpakosz/.tmux.git
         ln -s -f .tmux/.tmux.conf
         cp .tmux/.tmux.conf.local .
     fi
@@ -78,6 +82,11 @@ install_zsh() {
         sed -i 's/^\(ZSH_THEME\).*/\1="powerlevel10k\/powerlevel10k"/' ~/.zshrc
     fi
 
+    if [ ! -d "${HOME}/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ]; then
+        git clone --depth=1 git://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"/plugins/zsh-autosuggestions
+
+        add_plugin_to_zsh "zsh-autosuggestions"
+    fi
 }
 
 install_miniconda() {
@@ -91,6 +100,34 @@ install_miniconda() {
 
     if [ "$(cat ${HOME}/.zshrc | grep -c 'conda initialize')" -eq 0 ]; then
         ~/miniconda3/bin/conda init zsh
+    fi
+
+    if [ ! -f ~/.condarc ]; then
+        tee ~/.condarc <<-EOF
+channels:
+  - defaults
+show_channel_urls: true
+default_channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/r
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/msys2
+custom_channels:
+  conda-forge: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  msys2: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  bioconda: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  menpo: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  pytorch: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+  simpleitk: https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud
+EOF
+    fi
+}
+
+add_plugin_to_zsh(){
+    plugin_name="$1"
+    if [ "$(cat ~/.zshrc | grep -c $plugin_name)" -eq 0 ]; then
+        allPlugins=$(grep ^plugins= ~/.zshrc | cut -d '(' -f2 | cut -d ')' -f1)
+        allPlugins="${allPlugins} $plugin_name"
+        sed -i 's/^plugins=.*/plugins=('"${allPlugins}"')/' ~/.zshrc
     fi
 }
 
@@ -122,11 +159,7 @@ install_pyenv() {
     fi
 
     # zsh add plugin
-    if [ -n "" ] && [ "$(cat ~/.zshrc | grep -c pyenv)" -eq 0 ]; then
-        allPlugins=$(grep ^plugins= ~/.zshrc | cut -d '(' -f2 | cut -d ')' -f1)
-        allPlugins="${allPlugins} pyenv"
-        sed -i 's/^plugins=.*/plugins=('"${allPlugins}"')/' ~/.zshrc
-    fi
+    add_plugin_to_zsh "pyenv"
 }
 
 config_network() {
@@ -194,7 +227,7 @@ config_mount() {
 
 config_mirrors() {
     if [ "$(cat /etc/apt/sources.list | grep -c mirrors.aliyun.com)" -eq 0 ]; then
-        file_url="https://raw.githubusercontent.com/tuot/script/mirrors_update.sh"
+        file_url="https://gitlab.com/tuo/script/-/raw/main/mirrors_update.sh"
         if [ "$(dpkg --list | grep -wc wget)" -ne 0 ]; then
             wget -qO- "${file_url}" | sudo bash -s aliyun
         elif [ "$(dpkg --list | grep -wc curl)" -ne 0 ]; then
