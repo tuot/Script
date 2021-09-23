@@ -261,8 +261,7 @@ main() {
     install_miniconda
     pip_setup
 
-    echo "Completed"
-    echo "........."
+    echo "Completed........."
 }
 
 main
