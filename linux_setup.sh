@@ -10,12 +10,13 @@ pip_setup() {
     # pip3:
     # curl -O https://bootstrap.pypa.io/get-pip.py | python
 
-    if [ -d "${HOME}/miniconda3/" ]; then
-        source "${HOME}/miniconda3/bin/activate" base
+    if [ "$(pip config list | grep -c mirrors.aliyun.com)" -eq 0 ]; then
+        if [ -d "${HOME}/miniconda3/" ]; then
+            source "${HOME}/miniconda3/bin/activate" base
+        fi
+        pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+        pip config set global.trusted-host mirrors.aliyun.com
     fi
-
-    pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
-    pip config set global.trusted-host mirrors.aliyun.com
 }
 
 install_docker() {
@@ -122,7 +123,7 @@ EOF
     fi
 }
 
-add_plugin_to_zsh(){
+add_plugin_to_zsh() {
     plugin_name="$1"
     if [ "$(cat ~/.zshrc | grep -c $plugin_name)" -eq 0 ]; then
         allPlugins=$(grep ^plugins= ~/.zshrc | cut -d '(' -f2 | cut -d ')' -f1)
