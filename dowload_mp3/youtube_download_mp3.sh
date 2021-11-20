@@ -32,7 +32,7 @@ install_dependence() {
 
 download() {
     playlist_length=$(youtube-dl --proxy "$PROXY" -J --flat-playlist "$URL" \
-    | python -c 'import json,sys;obj=json.load(sys.stdin);json.dump(obj, open("playlist.json", "w+", encoding="utf-8"), ensure_ascii=False, indent=4);print(len(obj["entries"]));
+    | python -c 'import json,sys;obj=json.load(sys.stdin);json.dump(obj, open("playlist.json", "w+", encoding="utf-8"), ensure_ascii=False, indent=4);print(len(obj.get("entries", [1])));
     ')
 
     internal=$(("$playlist_length" / "$PROCESSOR"))
@@ -95,4 +95,5 @@ main() {
     download
 }
 
+# example url: 'https://www.youtube.com/watch?v=Ap0huJwyT7g&list=RDAp0huJwyT7g&start_radio=1'
 main "$@"
