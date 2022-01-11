@@ -1,0 +1,6 @@
+kombu
+httpx
+requests
+matplotlib
+pandas
+tqdm

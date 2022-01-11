@@ -46,6 +46,101 @@ def combine_file(data_file, error_file):
     file_name = file_dir / 'new.csv'
     df_data.to_csv(file_name, index=False)
 
+def update_file(data_file, map_file):
+    data_file_obj = pathlib.Path(data_file)
+    map_file_obj = pathlib.Path(map_file)
+
+    file_dir = map_file_obj.parent
+    if not data_file_obj.exists() or not map_file_obj.exists():
+        raise Exception("File does not exist.")
+
+    df = pd.read_csv(data_file_obj)
+
+    id_map = {}
+    with open(map_file_obj) as fp:
+        reader = csv.DictReader(fp)
+        for i in reader:
+            account_number = i['account_number']
+            value = i['bc_id']
+            id_map[account_number] = value
+    for index, row in df.iterrows():
+        account_number = row['account_number (Optional)']
+        value = id_map[account_number]
+        df.loc[index, 'Customer Group ID (Optional)'] = value
+
+    df_data = df
+    file_name = file_dir / 'new.csv'
+    df_data.to_csv(file_name, index=False)
+
+
+def clean_file(data_file):
+    data_file_obj = pathlib.Path(data_file)
+
+    file_dir = data_file_obj.parent
+    if not data_file_obj.exists():
+        raise Exception("File does not exist.")
+
+    df = pd.read_csv(data_file_obj)
+
+    index_list = []
+    for index, row in df.iterrows():
+        msg = row['ErrMsg']
+        if msg == "Email is not correct.":
+            continue
+        index_list.append(index)
+
+    df_data = df.iloc[index_list]
+    file_name = file_dir / 'new.csv'
+    df_data.to_csv(file_name, index=False)
+
+
+def duplicate_data_count(data_file):
+    data_file_obj = pathlib.Path(data_file)
+
+    file_dir = data_file_obj.parent
+    if not data_file_obj.exists():
+        raise Exception("File does not exist.")
+
+    df = pd.read_csv(data_file_obj)
+
+    data_list = []
+    email_list = []
+    cnt = 0
+    for index, row in df.iterrows():
+        email = row['Company User Email (Required)'].lower()
+        # account_number = row['added so you can find data remove before s ending to Julian']
+        # account_number = row['Account Number to Match off of']
+        account_number = 0
+        key = f'{email},{account_number}'
+        if key not in data_list:
+            data_list.append(key)
+        else:
+            cnt += 1
+        if email not in email_list:
+            email_list.append(email)
+    print("duplicate_data:")
+    print(len(df.index) - len(data_list))
+    print(cnt)
+    print("email count:")
+    print(len(email_list))
+
+def excel_to_csv(file_path):
+    file_obj = pathlib.Path(file_path)
+    file_dir = file_obj.parent
+
+    new_csv_file = file_dir / f'{file_obj.with_suffix("").stem}.csv'
+    read_file = pd.read_excel (file_obj)
+    read_file.to_csv (new_csv_file, index = None, header=True)
+    print(str(new_csv_file))
+
+def open_file_test(file_path='/mnt/data/test/tmp2.py'):
+    file_obj = pathlib.Path(file_path)
+    file_dir = file_obj.parent
+
+    f = file_obj.open('rb')
+    print()
+
+
 
 if __name__ == '__main__':
     # combine_error_file('/mnt/data/1.csv',
