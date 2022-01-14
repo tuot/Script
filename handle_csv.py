@@ -2,6 +2,7 @@ import pathlib
 import csv
 import fire
 import pandas as pd
+import time
 
 
 def split_csv(file_path, split_num):
@@ -132,6 +133,39 @@ def excel_to_csv(file_path):
     read_file = pd.read_excel (file_obj)
     read_file.to_csv (new_csv_file, index = None, header=True)
     print(str(new_csv_file))
+
+
+
+def miss_data(data_file, other_file):
+    data_file_obj = pathlib.Path(data_file)
+    other_file_obj = pathlib.Path(other_file)
+
+    file_dir = data_file_obj.parent
+    if not data_file_obj.exists() or not other_file_obj.exists():
+        raise Exception("File does not exist.")
+
+    df_data = pd.read_csv(data_file_obj, low_memory=False)
+    df_other_data = pd.read_excel(other_file_obj)
+
+    index_list = []
+    miss_email = []
+    for index, row in df_other_data.iterrows():
+        email = row['Not in BundleB2B or BigCommerce'].lower()
+        miss_email.append(email) 
+
+    dd = []
+    for index, row in df_data.iterrows():
+        email = row['Company User Email (Required)'].lower()
+        if email in miss_email:
+            index_list.append(index)
+            dd.append(email)
+
+    print(set(miss_email) - set(dd))
+
+    df_data = df_data.iloc[index_list]
+    file_name = file_dir / f'{int(time.time())}.csv'
+    df_data.to_csv(file_name, index=False)
+
 
 def open_file_test(file_path='/mnt/data/test/tmp2.py'):
     file_obj = pathlib.Path(file_path)
