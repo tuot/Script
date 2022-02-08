@@ -1,7 +1,6 @@
 #!/bin/bash
 #Server OS info
 
-touch osresult
 OS_version=''
 
 
@@ -17,7 +16,6 @@ echo -e "------------------------------------"
 
 hostname=`hostname`
 echo -e "  - HostName:        $hostname" 
-echo -e "$hostname" 1> osresult
 #osinfo=`cat /etc/redhat-release`
 
 #echo -e "OS info:        $osinfo"
@@ -25,15 +23,12 @@ echo -e "$hostname" 1> osresult
 
 kernelinfo=`uname -r`
 echo -e "  - LinuxKernel:     $kernelinfo" 
-echo -e "$kernelinfo" 1>> osresult
 
 kernelmac=`uname -m`
 echo -e "  - HW Machine:      $kernelmac" 
-echo -e "$kernelmac" 1>> osresult
 
 CPU=`cat /proc/cpuinfo | grep "model name" | head -n 1 | awk -F ":" "{print $2}"`
 echo -e "  - CPU info:        $CPU" 
-echo -e "$CPU" 1>> osresult
 
 if [ "${OS_version}" == 'CentOS6' ];then
         network=`ifconfig -a  | awk 'BEGIN {FS="\n"; RS=""} {print $1,$2}' | grep -v 'lo' |  awk '{print "\t\t"$1,$7}'`
@@ -42,20 +37,16 @@ else
 fi
 
 echo -e "  - NetWork info:    $network" 
-echo -e "$network" 1>> osresult
 
 externalip=$(timeout 3 curl -s ipecho.net/plain;echo)
 [ $? -ne 0 -o 'X' == "$externalip"X ] && externalip='No outside network or ACL drop'
 echo -e "  - External IP:     $externalip" 
-echo -e "$externalip" 1>> osresult
 
 
 Username=`whoami`
 echo -e "  - UserName:        $Username" 
-echo -e "$Username" 1>> osresult
 
 echo -e "  - UserHomeDir:     $HOME\n" 
-echo -e "$HOME" 1>> osresult
 echo -e "\n---------------------------------------------------------------------------------------------\n"
 
 #mem detect
@@ -72,9 +63,6 @@ report_MemUsedPercent="$(awk "BEGIN {if($MemTotal==0){printf 100}else{printf \"%
 echo -e "  - Memory Total:    ${report_MemTotal}" 
 echo -e "  - Memory Total:    ${report_MemFree}" 
 echo -e "  - Memory Total:    ${report_MemUsedPercent}" 
-echo -e "$report_MemTotal" 1>> osresult
-echo -e "$report_MemFree" 1>> osresult
-echo -e "$report_MemUsedPercent" 1>> osresult
 
 echo -e "\n---------------------------------------------------------------------------------------------\n"
 
@@ -108,12 +96,6 @@ echo -e "  - Disk Used Percent:     ${report_DiskUsedPercent}"
 echo -e "  - Inode Total:           ${report_InodeTotal}" 
 echo -e "  - Inode Free:            ${report_InodeFree}" 
 echo -e "  - Inode Used Percent:    ${report_InodeUsedPercent}" 
-echo -e "$report_DiskTotal" 1>> osresult
-echo -e "$report_DiskFree" 1>> osresult
-echo -e "$report_DiskUsedPercent" 1>> osresult
-echo -e "$report_InodeTotal" 1>> osresult
-echo -e "$report_InodeFree" 1>> osresult
-echo -e "$report_InodeUsedPercent" 1>> osresult
 
 echo -e "\n---------------------------------------------------------------------------------------------\n"
 
