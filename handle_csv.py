@@ -31,7 +31,10 @@ def combine_file(data_file, error_file):
     if not data_file_obj.exists() or not error_file_obj.exists():
         raise Exception("File does not exist.")
 
-    df = pd.read_csv(data_file_obj)
+    if data_file_obj.suffix == '.csv':
+        df = pd.read_csv(data_file_obj)
+    else:
+        df = pd.read_excel(data_file_obj)
 
     error_list = []
     with open(error_file_obj) as fp:

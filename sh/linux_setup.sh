@@ -228,7 +228,7 @@ config_mount() {
 
 config_mirrors() {
     if [ "$(cat /etc/apt/sources.list | grep -c mirrors.aliyun.com)" -eq 0 ]; then
-        file_url="https://raw.githubusercontent.com/tuot/Script/main/mirrors_update.sh"
+        file_url="https://raw.githubusercontent.com/tuot/Script/main/sh/mirrors_update.sh"
         if [ "$(dpkg --list | grep -wc wget)" -ne 0 ]; then
             wget -qO- "${file_url}" | sudo bash -s aliyun
         elif [ "$(dpkg --list | grep -wc curl)" -ne 0 ]; then
