@@ -47,7 +47,7 @@ def main():
     print(templ % ("PID", "User", "USS", "PSS", "Swap", "RSS", "NAME", "Cmdline"))
     print("=" * 100)
 
-    total_rss = 0
+    total = [0, 0, 0, 0]
     process_map = {}
     for p in procs:
         name = p.name()
@@ -56,7 +56,11 @@ def main():
             process_map[name][1] += p._rss
         else:
             process_map[name] = [p._uss, p._rss, p]
-        total_rss += p._rss
+
+        total[0] += p._uss
+        total[1] += p._pss if p._pss else 0
+        total[2] += p._swap if p._swap else 0
+        total[3] += p._rss
 
     process_map = dict(
         sorted(process_map.items(), key=lambda x: x[1][0], reverse=True))
@@ -74,7 +78,12 @@ def main():
             cmd,
         )
         print(line)
-    print(templ % ("", "", "", "", "", convert_bytes(total_rss), "", ""))
+    print(templ % ("", "",
+                   convert_bytes(total[0]),
+                   convert_bytes(total[1]),
+                   convert_bytes(total[2]),
+                   convert_bytes(total[3]),
+                   "", ""))
 
     if ad_pids:
         print("warning: access denied for %s pids" % (len(ad_pids)),
