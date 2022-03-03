@@ -7,12 +7,13 @@ import fire
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-# Linux
-# desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
-# Windows
-desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop') 
+if os.name == 'nt':
+    desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+elif os.name == 'posix':
+    desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
 
 print(desktop)
+
 
 class Watcher:
     def __init__(self):
@@ -45,7 +46,8 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copytree(s, d, symlinks, ignore)
         else:
             shutil.copy2(s, d)
-    #shutil.rmtree(src)
+    # shutil.rmtree(src)
+
 
 class Handler(FileSystemEventHandler):
 
@@ -66,7 +68,6 @@ class Handler(FileSystemEventHandler):
                 print("Copy It!")
                 parent = pathlib.Path(event.src_path).parent
                 copytree(parent, desktop)
-
 
 
 if __name__ == '__main__':
