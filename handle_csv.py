@@ -139,34 +139,31 @@ def excel_to_csv(file_path):
 
 
 
-def miss_data(data_file, other_file):
+def not_create_data(data_file, exist_data_file):
     data_file_obj = pathlib.Path(data_file)
-    other_file_obj = pathlib.Path(other_file)
+    exist_data_file = pathlib.Path(exist_data_file)
 
     file_dir = data_file_obj.parent
-    if not data_file_obj.exists() or not other_file_obj.exists():
+    if not data_file_obj.exists() or not exist_data_file.exists():
         raise Exception("File does not exist.")
 
-    df_data = pd.read_csv(data_file_obj, low_memory=False)
-    df_other_data = pd.read_excel(other_file_obj)
+    df_data = pd.read_csv(data_file_obj)
+
+    company_list = []
+    with open(exist_data_file) as fp:
+        reader = csv.DictReader(fp)
+        for i in reader:
+            company_name = i['Company Name (Required)']
+            company_list.append(company_name)
 
     index_list = []
-    miss_email = []
-    for index, row in df_other_data.iterrows():
-        email = row['Not in BundleB2B or BigCommerce'].lower()
-        miss_email.append(email) 
-
-    dd = []
     for index, row in df_data.iterrows():
-        email = row['Company User Email (Required)'].lower()
-        if email in miss_email:
+        name = row['Company Name (Required)']
+        if name not in company_list:
             index_list.append(index)
-            dd.append(email)
-
-    print(set(miss_email) - set(dd))
 
     df_data = df_data.iloc[index_list]
-    file_name = file_dir / f'{int(time.time())}.csv'
+    file_name = file_dir / 'not_create_data.csv'
     df_data.to_csv(file_name, index=False)
 
 
