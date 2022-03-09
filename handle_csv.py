@@ -41,7 +41,7 @@ def combine_file(data_file, error_file):
         reader = csv.DictReader(fp)
         df['ErrMsg'] = ''
         for i in reader:
-            line = int(i['Line']) -2
+            line = int(i['Line']) - 2
             value = i['ErrMsg']
             df.loc[line, 'ErrMsg'] = value
             error_list.append(line)
@@ -49,6 +49,7 @@ def combine_file(data_file, error_file):
     df_data = df.iloc[error_list]
     file_name = file_dir / 'new.csv'
     df_data.to_csv(file_name, index=False)
+
 
 def update_file(data_file, map_file):
     data_file_obj = pathlib.Path(data_file)
@@ -128,15 +129,15 @@ def duplicate_data_count(data_file):
     print("email count:")
     print(len(email_list))
 
+
 def excel_to_csv(file_path):
     file_obj = pathlib.Path(file_path)
     file_dir = file_obj.parent
 
     new_csv_file = file_dir / f'{file_obj.with_suffix("").stem}.csv'
-    read_file = pd.read_excel (file_obj)
-    read_file.to_csv (new_csv_file, index = None, header=True)
+    read_file = pd.read_excel(file_obj)
+    read_file.to_csv(new_csv_file, index=None, header=True)
     print(str(new_csv_file))
-
 
 
 def not_create_data(data_file, exist_data_file):
@@ -176,8 +177,5 @@ def open_file_test(file_path='/mnt/data/test/tmp2.py'):
     print()
 
 
-
 if __name__ == '__main__':
-    # combine_error_file('/mnt/data/1.csv',
-    #                    '/mnt/data/invalidation_company_import_oov9d9k3v8.csv')
     fire.Fire()
