@@ -147,19 +147,20 @@ def not_create_data(data_file, exist_data_file):
     if not data_file_obj.exists() or not exist_data_file.exists():
         raise Exception("File does not exist.")
 
-    df_data = pd.read_csv(data_file_obj)
+    # df_data = pd.read_csv(data_file_obj)
+    df_data = pd.read_csv(data_file_obj, encoding='cp1252')
 
-    company_list = []
-    with open(exist_data_file) as fp:
+    email_list = []
+    with open(exist_data_file, encoding='utf-8') as fp:
         reader = csv.DictReader(fp)
         for i in reader:
-            company_name = i['Company Name (Required)']
-            company_list.append(company_name)
+            email = i['Company User Email (Required)']
+            email_list.append(email)
 
     index_list = []
     for index, row in df_data.iterrows():
-        name = row['Company Name (Required)']
-        if name not in company_list:
+        email = row['Company User Email (Required)']
+        if email not in email_list:
             index_list.append(index)
 
     df_data = df_data.iloc[index_list]

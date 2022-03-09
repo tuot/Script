@@ -63,7 +63,7 @@ def main():
         total[3] += p._rss
 
     process_map = dict(
-        sorted(process_map.items(), key=lambda x: x[1][0], reverse=True))
+        sorted(process_map.items(), key=lambda x: x[1][1], reverse=True))
     for k, v in process_map.items():
         uss, rss, p = v
         cmd = " ".join(p._info["cmdline"])[:80] if p._info["cmdline"] else ""
