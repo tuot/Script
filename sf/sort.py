@@ -174,6 +174,42 @@ class SortAlgorithm:
 
         return m_sort(data, 0, len(data)-1, reverse)
 
+    @staticmethod
+    def heap_sort(data, reverse=False):
 
-res = SortAlgorithm.merge_sort([9,8,7,6,5,4,3])
+        def heap(data, l, reverse):
+            index = (l - 1)//2
+            for i in range(index, -1, -1):
+                if (i*2 + 1) <= l and (i*2 + 2) <= l:
+                    if not reverse:
+                        if data[i*2 + 1] > data[i*2 + 2]:
+                            max_i = i*2 + 1
+                        else:
+                            max_i = i*2 + 2
+                        if data[i] < data[max_i]:
+                            swap(data, i, max_i)
+                    else:
+                        if data[i*2 + 1] < data[i*2 + 2]:
+                            max_i = i*2 + 1
+                        else:
+                            max_i = i*2 + 2
+                        if data[i] > data[max_i]:
+                            swap(data, i, max_i)
+                elif (i*2 + 1) <= l:
+                    if not reverse:
+                        if data[i] < data[i*2 + 1]:
+                            swap(data, i, i*2 + 1)
+                    else:
+                        if data[i] > data[i*2 + 1]:
+                            swap(data, i, i*2 + 1)
+
+        l = len(data)-1
+        for i in range(l):
+            heap(data, l-i, reverse)
+            swap(data, 0, l-i)
+
+        return data
+
+
+res = SortAlgorithm.heap_sort([0,9, 8, 7, 6,-1, 5, 4, 3], True)
 print(res)
