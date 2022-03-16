@@ -6,6 +6,18 @@ from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
 # from __future__ import print_function
 
 
+CNT = 200
+MAX_WORKER = 100
+
+def log_time(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        res = func(*args, **kwargs)
+        print(time.time() - start)
+        return res
+    return wrapper
+
+
 def do_thing(a, b):
     time.sleep(1)
     return a*b
@@ -16,59 +28,57 @@ async def do_thing2(a, b):
     return a*b
 
 
+@log_time
 def test_thread():
     res = []
-    start = time.time()
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=MAX_WORKER) as executor:
         obj_list = []
-        for i in range(20):
+        for i in range(CNT):
             t = executor.submit(do_thing, i, i)
             obj_list.append(t)
         for future in as_completed(obj_list):
             res.append(future.result())
-    print(time.time() - start)
 
 
+@log_time
 def test_process():
     res = []
-    start = time.time()
-    with ProcessPoolExecutor(max_workers=10) as executor:
-        data = ((i, i) for i in range(20))
+    with ProcessPoolExecutor(max_workers=MAX_WORKER) as executor:
+        data = ((i, i) for i in range(CNT))
         for future in executor.map(do_thing, *zip(*data)):
             res.append(future)
-    print(time.time() - start)
 
 
 async def test_coroutine():
-    start = time.time()
     task_list = []
-    for i in range(200):
+    for i in range(CNT):
         task_list.append(do_thing2(i, i))
     res = await asyncio.gather(*task_list)
-    print(time.time() - start)
     return res
 
 
 async def test_coroutine2():
-    start = time.time()
     task_list = []
-    for i in range(200):
+    for i in range(CNT):
         task_list.append(do_thing2(i, i))
     res = []
     for future in asyncio.as_completed(task_list):
         result = await future
         res.append(result)
-    print(time.time() - start)
     return res
 
 
+@log_time
 def test_async_io():
     res = asyncio.run(test_coroutine())
-    print(res)
+
+
+@log_time
+def test_async_io2():
     res = asyncio.run(test_coroutine2())
-    print(res)
 
 
 test_thread()
 test_process()
 test_async_io()
+test_async_io2()
