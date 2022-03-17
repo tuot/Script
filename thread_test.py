@@ -9,6 +9,7 @@ from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
 CNT = 200
 MAX_WORKER = 100
 
+
 def log_time(func):
     def wrapper(*args, **kwargs):
         start = time.time()
@@ -25,6 +26,8 @@ def do_thing(a, b):
 
 async def do_thing2(a, b):
     await asyncio.sleep(1)
+    if a*b == 25:
+        raise Exception
     return a*b
 
 
@@ -53,7 +56,7 @@ async def test_coroutine():
     task_list = []
     for i in range(CNT):
         task_list.append(do_thing2(i, i))
-    res = await asyncio.gather(*task_list)
+    res = await asyncio.gather(*task_list, return_exceptions=True)
     return res
 
 
@@ -63,8 +66,12 @@ async def test_coroutine2():
         task_list.append(do_thing2(i, i))
     res = []
     for future in asyncio.as_completed(task_list):
-        result = await future
-        res.append(result)
+        try:
+            result = await future
+            res.append(result)
+        except Exception as e:
+            print(f'{e} happened while processing')
+
     return res
 
 
