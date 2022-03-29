@@ -24,12 +24,12 @@ reset_git_commit() {
     git filter-branch --env-filter '
 CORRECT_NAME='"$NAME"'
 CORRECT_EMAIL='"$EMAIL"'
-if [ "$GIT_COMMITTER_EMAIL" != "$CORRECT_EMAIL" ]
+if [ "$GIT_COMMITTER_EMAIL" != "$CORRECT_EMAIL" ] || [ "$GIT_COMMITTER_NAME" != "$CORRECT_NAME" ];
 then
     export GIT_COMMITTER_NAME="$CORRECT_NAME"
     export GIT_COMMITTER_EMAIL="$CORRECT_EMAIL"
 fi
-if [ "$GIT_AUTHOR_EMAIL" != "$CORRECT_EMAIL" ]
+if [ "$GIT_AUTHOR_EMAIL" != "$CORRECT_EMAIL" ] || [ "$GIT_AUTHOR_NAME" != "$CORRECT_NAME" ];
 then
     export GIT_AUTHOR_NAME="$CORRECT_NAME"
     export GIT_AUTHOR_EMAIL="$CORRECT_EMAIL"
@@ -38,8 +38,8 @@ fi
 
 }
 
-update_git_commit() {
-    echo "Wrong Eamil: $OLD_EMAIL, Name: $NAME", "Email: $EMAIL"
+change_git_commit() {
+    echo "Wrong Eamil: $OLD_EMAIL, New Name: $NAME", "Email: $EMAIL"
     is_continue
     git filter-branch --env-filter '
 OLD_EMAIL='"$OLD_EMAIL"'
@@ -60,7 +60,7 @@ fi
 
 main() {
     type=$1
-    if [ "$type" = "update" ]; then
+    if [ "$type" = "change" ]; then
         OLD_EMAIL=$2
         NAME=$3
         EMAIL=$4
@@ -73,7 +73,7 @@ main() {
         NAME=$2
         EMAIL=$3
     else
-        echo "update or reset?"
+        echo "change or reset?"
         exit 1
     fi
 
@@ -87,8 +87,8 @@ main() {
         exit 1
     fi
 
-    if [ "$type" = "update" ]; then
-        update_git_commit
+    if [ "$type" = "change" ]; then
+        change_git_commit
     elif [ "$type" = "reset" ]; then
         reset_git_commit
     fi
