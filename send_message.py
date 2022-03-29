@@ -3,8 +3,8 @@
 def console_log(msg):
     import requests
     try:
-        url = "http://maker.ifttt.com/trigger/info/with/key/bivMZhzWma1qDVu6HlnQ54"
-        resp = requests.post(url, timeout=10, json={"value1": msg})
+        url = "http://maker.ifttt.com/trigger/info/json/with/key/bycqDZ5Su_-VIDYHrAmxNG"
+        resp = requests.post(url, timeout=10, json={"date": msg})
         print(resp.text)
     except:
         pass
