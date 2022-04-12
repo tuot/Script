@@ -14,31 +14,22 @@ DB_USER=postgres
 DB_PASSWORD=password
 DB_PORT=5433
 
-MYDB="postgresql://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${DB_NAME}"
-IP_DB="postgresql://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${IP_DB_NAME}"
+DB_LIST="${DB_NAME} ${IP_DB_NAME}"
 
-if [ ! -f "${DB_NAME}.sql" ]; then
-    pg_dump --dbname="${MYDB}" -f "${DB_NAME}.sql"
-fi
-if [ ! -f "${IP_DB_NAME}.sql" ]; then
-    pg_dump --dbname="${IP_DB}" -f "${IP_DB_NAME}.sql"
-fi
+start=$(date "+%s")
+for name in $DB_LIST; do
+    {
+        if [ ! -f "${name}.sql" ]; then
+            DB_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${name}"
+            pg_dump --dbname="${DB_URL}" -f "${name}.sql"
+        fi
 
-echo "export done"
-
-# drop database
-psql -U postgres -c "drop database ""${DB_NAME}"
-psql -U postgres -c "drop database ""${IP_DB_NAME}"
-
-# create database
-psql -U postgres -c "create database ""${DB_NAME}"
-psql -U postgres -c "create database ""${IP_DB_NAME}"
-
-# import
-psql -U postgres -d "bundleb2b-v2.0-Dev" -f "${DB_NAME}.sql"
-rm "${DB_NAME}.sql"
-
-psql -U postgres -d "invoice-portal" -f "${IP_DB_NAME}.sql"
-rm "${IP_DB_NAME}.sql"
-
-echo "import done"
+        psql -U postgres -c "drop database IF EXISTS \"${name}\""
+        psql -U postgres -c "create database \"${name}\""
+        psql -U postgres -d "${name}" -f "${name}.sql"
+        rm "${name}.sql"
+    } &
+done
+wait
+end=$(date "+%s")
+echo "It takes $((end - start)) seconds to complete this task..."
