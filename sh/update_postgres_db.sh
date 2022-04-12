@@ -10,14 +10,18 @@ fi
 DB_NAME=bundleb2b-v2.0
 IP_DB_NAME=invoice-portal
 
-MYDB="postgresql://postgres:password@${HOST}:5433/${DB_NAME}"
-IP_DB="postgresql://postgres:password@${HOST}:5433/${IP_DB_NAME}"
+DB_USER=postgres
+DB_PASSWORD=password
+DB_PORT=5433
 
-if [ ! -f "db.sql" ]; then
-    pg_dump --dbname="${MYDB}" -f db.sql
+MYDB="postgresql://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${DB_NAME}"
+IP_DB="postgresql://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${IP_DB_NAME}"
+
+if [ ! -f "${DB_NAME}.sql" ]; then
+    pg_dump --dbname="${MYDB}" -f "${DB_NAME}.sql"
 fi
-if [ ! -f "ip_db.sql" ]; then
-    pg_dump --dbname="${IP_DB}" -f ip_db.sql
+if [ ! -f "${IP_DB_NAME}.sql" ]; then
+    pg_dump --dbname="${IP_DB}" -f "${IP_DB_NAME}.sql"
 fi
 
 echo "export done"
@@ -31,8 +35,10 @@ psql -U postgres -c "create database ""${DB_NAME}"
 psql -U postgres -c "create database ""${IP_DB_NAME}"
 
 # import
-psql -U postgres -d "bundleb2b-v2.0-Dev" -f db.sql
-psql -U postgres -d "invoice-portal" -f ip_db.sql
+psql -U postgres -d "bundleb2b-v2.0-Dev" -f "${DB_NAME}.sql"
+rm "${DB_NAME}.sql"
 
-rm db.sql ip_db.sql
+psql -U postgres -d "invoice-portal" -f "${IP_DB_NAME}.sql"
+rm "${IP_DB_NAME}.sql"
+
 echo "import done"
