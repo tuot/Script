@@ -1,8 +1,14 @@
 #!/bin/bash
 
-set -ex
+set -eu
+
+
+INFO() {
+    echo -e "\033[32m[INFO] $* \033[0m"
+}
 
 pip_setup() {
+    INFO "Config pip"
 
     # pip2:
     # curl -O https://bootstrap.pypa.io/pip/2.7/get-pip.py | python
@@ -20,6 +26,7 @@ pip_setup() {
 }
 
 install_docker() {
+    INFO "Install docker"
 
     if [ "$(dpkg --list | grep -c docker-ce)" -eq 0 ]; then
         curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
@@ -53,6 +60,7 @@ EOF
 }
 
 install_tmux() {
+    INFO "Install tmux"
     sudo apt install -y tmux
     if [ ! -d "${HOME}/.tmux" ]; then
         cd
@@ -63,6 +71,7 @@ install_tmux() {
 }
 
 install_zsh() {
+    INFO "Install zsh"
     sudo apt install -y zsh
 
     zsh="$(which zsh)"
@@ -91,6 +100,7 @@ install_zsh() {
 }
 
 install_miniconda() {
+    INFO "Install miniconda"
 
     if [ ! -d "${HOME}/miniconda3/" ]; then
         if [ ! -f "Miniconda3-latest-Linux-x86_64.sh" ]; then
@@ -124,6 +134,7 @@ EOF
 }
 
 add_plugin_to_zsh() {
+
     plugin_name="$1"
     if [ "$(cat ~/.zshrc | grep -c $plugin_name)" -eq 0 ]; then
         allPlugins=$(grep ^plugins= ~/.zshrc | cut -d '(' -f2 | cut -d ')' -f1)
@@ -133,6 +144,7 @@ add_plugin_to_zsh() {
 }
 
 install_pyenv() {
+    INFO "Install pyenv"
 
     sudo apt-get update
     sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
@@ -164,6 +176,7 @@ install_pyenv() {
 }
 
 config_network() {
+    INFO "Config network"
 
     if [ "$(uname -a | grep -c WSL)" -eq 1 ]; then
         sudo tee /etc/wsl.conf <<-EOF
@@ -173,9 +186,8 @@ EOF
 
         sudo rm /etc/resolv.conf
         sudo tee /etc/resolv.conf <<-EOF
-nameserver 114.114.114.114
+nameserver 223.5.5.5
 nameserver 8.8.8.8
-nameserver 1.1.1.1
 EOF
 
     elif [ "$(uname -a | grep -c Debian)" -eq 1 ]; then
@@ -187,17 +199,16 @@ EOF
             sudo systemctl -l --no-pager status resolvconf.service
 
             sudo tee /etc/resolvconf/resolv.conf.d/head <<-EOF
-nameserver 114.114.114.114
+nameserver 223.5.5.5
 nameserver 8.8.8.8
-nameserver 1.1.1.1
 EOF
             sudo resolvconf --enable-updates
             sudo resolvconf -u
         fi
-
+    # Ubuntu
     else
         if [ "$(cat /etc/resolv.conf | grep -c 8.8.8.8)" -eq 0 ]; then
-            sudo sed -i 's/^#DNS=/DNS=114.114.114.114 8.8.8.8 1.1.1.1/' /etc/systemd/resolved.conf
+            sudo sed -i 's/^#\?DNS=.*$/DNS=223.5.5.5 8.8.8.8/' /etc/systemd/resolved.conf
 
             if [ -f "/run/systemd/resolve/resolv.conf" ]; then
                 sudo mv /etc/resolv.conf /etc/resolv.conf.bak
@@ -210,6 +221,7 @@ EOF
 }
 
 config_mount() {
+    INFO "Config mount"
 
     if [ "$(vmware-hgfsclient)" ]; then
         echo "Will Mount"
@@ -227,6 +239,8 @@ config_mount() {
 }
 
 config_mirrors() {
+    INFO "Config mirrors"
+
     if [ "$(cat /etc/apt/sources.list | grep -c mirrors.aliyun.com)" -eq 0 ]; then
         file_url="https://raw.githubusercontent.com/tuot/Script/main/sh/mirrors_update.sh"
         if [ "$(dpkg --list | grep -wc wget)" -ne 0 ]; then
@@ -242,15 +256,18 @@ config_mirrors() {
 }
 
 common_config() {
+    INFO "Config common"
     sudo sed -i 's/^# \(set bell-style none\)/\1/' /etc/inputrc
 }
 
 main() {
+    INFO "Start setup"
 
     common_config
     config_mirrors
     config_mount
 
+    INFO "Install packages"
     sudo apt update &&
         sudo apt install -y vim git wget curl
 
@@ -261,7 +278,7 @@ main() {
     install_miniconda
     pip_setup
 
-    echo "Completed........."
+    INFO "Completed........."
 }
 
 main
