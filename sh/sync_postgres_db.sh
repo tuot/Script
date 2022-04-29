@@ -1,17 +1,18 @@
 #!/bin/bash
 
-set -ex
-
-if [ ! "$HOST" ]; then
-    echo "HOST is not set"
-    exit 1
-fi
+set -eu
 
 DB_NAME=bundleb2b-v2.0
 IP_DB_NAME=invoice-portal
 
+if [ "$#" -ne 2 ]; then
+    echo "Please input database Host and Password" >&2
+    exit 1
+fi
+
+HOST=$1
 DB_USER=postgres
-DB_PASSWORD=password
+DB_PASSWORD=$2
 DB_PORT=5433
 
 DB_LIST="${DB_NAME} ${IP_DB_NAME}"
@@ -21,7 +22,9 @@ for name in $DB_LIST; do
     {
         if [ ! -f "${name}.sql" ]; then
             DB_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${HOST}:${DB_PORT}/${name}"
+            set -x
             pg_dump --dbname="${DB_URL}" -f "${name}.sql"
+            set +x
         fi
 
         psql -U postgres -c "drop database IF EXISTS \"${name}\""
