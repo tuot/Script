@@ -4,6 +4,12 @@ set -eu
 
 export MSYS_NO_PATHCONV=1
 
+# check if enter file name and common name
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <file name> <common name>"
+    exit 1
+fi
+
 FILE_NAME="${1}"
 COMMON_NAME="${2}"
 
