@@ -1,3 +1,4 @@
+import copy
 import pathlib
 import csv
 import fire
@@ -139,6 +140,17 @@ def excel_to_csv(file_path):
     read_file.to_csv(new_csv_file, index=None, header=True)
     print(str(new_csv_file))
 
+def csv_to_excel(file_path):
+    file_obj = pathlib.Path(file_path)
+    file_dir = file_obj.parent
+
+    print(file_obj)
+
+    new_csv_file = file_dir / f'{file_obj.with_suffix("").stem}.xlsx'
+    read_file = pd.read_csv(file_obj, encoding='UTF-16',)
+    read_file.to_excel(new_csv_file, index=None, header=True)
+    print(str(new_csv_file))
+
 
 def not_create_data(data_file, exist_data_file):
     data_file_obj = pathlib.Path(data_file)
@@ -167,6 +179,59 @@ def not_create_data(data_file, exist_data_file):
     df_data = df_data.iloc[index_list]
     file_name = file_dir / 'not_create_data.csv'
     df_data.to_csv(file_name, index=False)
+
+
+def combine_company_and_user(company_file, user_file, address_file):
+    company_file_obj = pathlib.Path(company_file, )
+    user_file_obj = pathlib.Path(user_file)
+    address_file_obj = pathlib.Path(address_file)
+
+    file_dir = company_file_obj.parent
+    if not company_file_obj.exists() or not user_file_obj.exists():
+        raise Exception("File does not exist.")
+
+    df_company = pd.read_csv(company_file_obj, encoding='cp1252')
+    df_user = pd.read_csv(user_file_obj, encoding='cp1252')
+    df_address = pd.read_csv(address_file_obj, encoding='cp1252')
+
+
+    company_list_map = {}
+    for index, row in df_company.iterrows():
+        company_external_id = row['externalID (Optional)']
+        company_list_map[company_external_id] = row
+
+    missing_company_address = []
+    address_list = []
+    for index, row in df_address.iterrows():
+        company_external_id = row['Company External Id']
+        if company_external_id not in company_list_map.keys():
+            missing_company_address.append(index)
+        else:
+            company_row = company_list_map[company_external_id]
+            row['Customer Group ID (Required)'] = company_row['Customer Group ID (Optional)']
+            address_list.append(index)
+
+
+    missing_company_user = []
+    user_result = []
+    for index, row in df_user.iterrows():
+        company_external_id = row['Company External Id']
+        if company_external_id not in company_list_map.keys():
+            missing_company_user.append(index)
+            continue
+
+        company_row = company_list_map[company_external_id]
+        company_row = copy.deepcopy(company_row)
+        company_row['Company User Email (Required)'] = row['Email']
+        company_row['Company User First Name (Required)'] = row['First Name']
+        company_row['Company User Last Name (Required)'] = row['Last Name']
+        company_row['Company User Role (Optional)'] = row['Role']
+        user_result.append(company_row)
+
+    pd.DataFrame(user_result).to_csv(file_dir / 'new_user.csv', index=False)
+    df_user.iloc[missing_company_user].to_csv(file_dir / 'miss_company_user.csv', index=False)
+    df_address.iloc[address_list].to_csv(file_dir / 'new_address.csv', index=False)
+    df_address.iloc[missing_company_address].to_csv(file_dir / 'miss_company_address.csv', index=False)
 
 
 def open_file_test(file_path='/mnt/data/test/tmp2.py'):
