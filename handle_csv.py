@@ -234,6 +234,22 @@ def combine_company_and_user(company_file, user_file, address_file):
     df_address.iloc[missing_company_address].to_csv(file_dir / 'miss_company_address.csv', index=False)
 
 
+def split_duplicate_data(file_path, colum_name="Company User Email (Required)"):
+    file_obj = pathlib.Path(file_path)
+    file_dir = file_obj.parent
+    file_name = file_obj.with_suffix("").stem
+
+    df = pd.read_csv(file_obj, encoding='cp1252')
+    df[colum_name] = df[colum_name].astype(str).str.lower()
+
+    df_duplicate = df[df.duplicated(subset=[colum_name], keep=False)]
+    df_no_duplicate = df[~df.duplicated(subset=[colum_name], keep=False)]
+
+    df_duplicate.to_csv(file_dir / f'{file_name}-duplicate.csv', index=False)
+    df_no_duplicate.to_csv(file_dir / f'{file_name}-no-duplicate.csv', index=False)
+
+
+
 def open_file_test(file_path='/mnt/data/test/tmp2.py'):
     file_obj = pathlib.Path(file_path)
     file_dir = file_obj.parent
