@@ -181,10 +181,9 @@ def not_create_data(data_file, exist_data_file):
     df_data.to_csv(file_name, index=False)
 
 
-def combine_company_and_user(company_file, user_file, address_file):
+def combine_company_and_user(company_file, user_file):
     company_file_obj = pathlib.Path(company_file, )
     user_file_obj = pathlib.Path(user_file)
-    address_file_obj = pathlib.Path(address_file)
 
     file_dir = company_file_obj.parent
     if not company_file_obj.exists() or not user_file_obj.exists():
@@ -192,25 +191,11 @@ def combine_company_and_user(company_file, user_file, address_file):
 
     df_company = pd.read_csv(company_file_obj, encoding='cp1252')
     df_user = pd.read_csv(user_file_obj, encoding='cp1252')
-    df_address = pd.read_csv(address_file_obj, encoding='cp1252')
-
 
     company_list_map = {}
     for index, row in df_company.iterrows():
         company_external_id = row['externalID (Optional)']
         company_list_map[company_external_id] = row
-
-    missing_company_address = []
-    address_list = []
-    for index, row in df_address.iterrows():
-        company_external_id = row['Company External Id']
-        if company_external_id not in company_list_map.keys():
-            missing_company_address.append(index)
-        else:
-            company_row = company_list_map[company_external_id]
-            row['Customer Group ID (Required)'] = company_row['Customer Group ID (Optional)']
-            address_list.append(index)
-
 
     missing_company_user = []
     user_result = []
@@ -230,6 +215,36 @@ def combine_company_and_user(company_file, user_file, address_file):
 
     pd.DataFrame(user_result).to_csv(file_dir / 'new_user.csv', index=False)
     df_user.iloc[missing_company_user].to_csv(file_dir / 'miss_company_user.csv', index=False)
+
+
+def combine_company_and_address(company_file, address_file):
+    company_file_obj = pathlib.Path(company_file, )
+    address_file_obj = pathlib.Path(address_file)
+
+    file_dir = company_file_obj.parent
+    if not company_file_obj.exists() or not address_file_obj.exists():
+        raise Exception("File does not exist.")
+
+    df_company = pd.read_csv(company_file_obj, encoding='cp1252')
+    df_address = pd.read_csv(address_file_obj, encoding='cp1252')
+
+
+    company_list_map = {}
+    for index, row in df_company.iterrows():
+        company_external_id = row['externalID (Optional)']
+        company_list_map[company_external_id] = row
+
+    missing_company_address = []
+    address_list = []
+    for index, row in df_address.iterrows():
+        company_external_id = row['Company External Id']
+        if company_external_id not in company_list_map.keys():
+            missing_company_address.append(index)
+        else:
+            company_row = company_list_map[company_external_id]
+            df_address.loc[index, 'Customer Group ID (Required)'] = str(company_row['Customer Group ID (Optional)'])
+            address_list.append(index)
+
     df_address.iloc[address_list].to_csv(file_dir / 'new_address.csv', index=False)
     df_address.iloc[missing_company_address].to_csv(file_dir / 'miss_company_address.csv', index=False)
 
@@ -248,6 +263,36 @@ def split_duplicate_data(file_path, colum_name="Company User Email (Required)"):
     df_duplicate.to_csv(file_dir / f'{file_name}-duplicate.csv', index=False)
     df_no_duplicate.to_csv(file_dir / f'{file_name}-no-duplicate.csv', index=False)
 
+
+def merge_two_file(file_a, file_b):
+    file_a_obj = pathlib.Path(file_a)
+    file_b_obj = pathlib.Path(file_b)
+    file_dir = file_a_obj.parent
+
+    df_a = pd.read_csv(file_a_obj, encoding='cp1252')
+    df_b = pd.read_csv(file_b_obj, encoding='cp1252')
+
+    df_a = df_a.append(df_b, ignore_index=True)
+    df_a.to_csv(file_dir / 'merge_file.csv', index=False)
+
+
+def filter_file_by_column(file_a, file_b, column_name="Company Status"):
+    file_a_obj = pathlib.Path(file_a)
+    file_b_obj = pathlib.Path(file_b)
+    file_dir = file_a_obj.parent
+
+    df_a = pd.read_csv(file_a_obj, encoding='cp1252')
+    df_b = pd.read_csv(file_b_obj, encoding='cp1252')
+ 
+    # get rows if  column value equal AAA
+    df_a = df_a[df_a[column_name] == 'INACTIVE']
+    # get all id in df_a    
+    id_list = df_a['Customer Group ID (Optional)'].tolist()
+    # get rows if id in df_b
+    df_b = df_b[df_b['Customer Group ID (Optional)'].isin(id_list)]
+
+    # to csv
+    df_b.to_csv(file_dir / 'qqqqqqqqqq.csv', index=False)
 
 
 def open_file_test(file_path='/mnt/data/test/tmp2.py'):
