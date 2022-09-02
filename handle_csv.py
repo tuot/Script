@@ -294,20 +294,20 @@ def filter_file_by_column(file_a, file_b, column_name="Company Status"):
     # to csv
     df_b.to_csv(file_dir / 'qqqqqqqqqq.csv', index=False)
 
-def translate_file(file, words_map_file):
+def translate_file(file, words_map_file, lang='nl'):
 
-    file_path = pathlib.Path(file)
-    file_dir = file_path.parent
-    file_name = file_path.with_suffix("").stem
+    file_path = pathlib.Path(pathlib.Path(file).resolve())
+    file_dir = file_path.parent.parent
+    file_name = file_path.name
 
     words_map_path = pathlib.Path(words_map_file)
     file_content = open(file_path, 'r', encoding='utf-8').read()
     df = pd.read_excel(words_map_path)
 
     for index, row in df.iterrows():
-        print(row['en'], row['nl'])
-        file_content = file_content.replace(row['en'], row['nl'])
-    new_file_path = file_dir / (str(file_name)+"-nl.html")
+        file_content = file_content.replace(row['en'], row[lang])
+    new_file_path = file_dir / lang / file_name
+    print(new_file_path)
     with open(new_file_path, 'w', encoding='utf-8') as f:
         f.write(file_content)
 
