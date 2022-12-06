@@ -704,22 +704,22 @@ function check() {
     getMemStatus
     getDiskStatus
     getNetworkStatus
-    # getListenStatus
-    # getProcessStatus
-    # getServiceStatus
-    # getAutoStartStatus
-    # getLoginStatus
-    # getCronStatus
-    # getUserStatus
-    # getPasswordStatus
-    # getSudoersStatus
-    # getJDKStatus
-    # getFirewallStatus
-    # getSSHStatus
-    # getSyslogStatus
-    # getSNMPStatus
-    # getNTPStatus
-    # getInstalledStatus
+    getListenStatus
+    getProcessStatus
+    getServiceStatus
+    getAutoStartStatus
+    getLoginStatus
+    getCronStatus
+    getUserStatus
+    getPasswordStatus
+    getSudoersStatus
+    getJDKStatus
+    getFirewallStatus
+    getSSHStatus
+    getSyslogStatus
+    getSNMPStatus
+    getNTPStatus
+    getInstalledStatus
     # getchage_file_24h
 }
 check
