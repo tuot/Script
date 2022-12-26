@@ -6,8 +6,8 @@ from concurrent.futures import (ProcessPoolExecutor, ThreadPoolExecutor,
 # from __future__ import print_function
 
 
-CNT = 200
-MAX_WORKER = 100
+CNT = 100
+MAX_WORKER = 20
 
 
 def log_time(func):
@@ -39,9 +39,21 @@ def test_thread():
         for i in range(CNT):
             t = executor.submit(do_thing, i, i)
             obj_list.append(t)
-        for future in as_completed(obj_list):
+        for future in as_completed(obj_list): # no order
             res.append(future.result())
+    print(res)
 
+@log_time
+def test_thread2():
+    res = []
+    with ThreadPoolExecutor(max_workers=MAX_WORKER) as executor:
+        obj_list = []
+        for i in range(CNT):
+            t = executor.submit(do_thing, i, i)
+            obj_list.append(t)
+        for future in obj_list: # has order
+            res.append(future.result())
+    print(res)
 
 @log_time
 def test_process():
@@ -86,6 +98,7 @@ def test_async_io2():
 
 
 test_thread()
-test_process()
-test_async_io()
-test_async_io2()
+test_thread2()
+# test_process()
+# test_async_io()
+# test_async_io2()
