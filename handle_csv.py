@@ -140,6 +140,7 @@ def excel_to_csv(file_path):
     read_file.to_csv(new_csv_file, index=None, header=True)
     print(str(new_csv_file))
 
+
 def csv_to_excel(file_path):
     file_obj = pathlib.Path(file_path)
     file_dir = file_obj.parent
@@ -214,7 +215,8 @@ def combine_company_and_user(company_file, user_file):
         user_result.append(company_row)
 
     pd.DataFrame(user_result).to_csv(file_dir / 'new_user.csv', index=False)
-    df_user.iloc[missing_company_user].to_csv(file_dir / 'miss_company_user.csv', index=False)
+    df_user.iloc[missing_company_user].to_csv(
+        file_dir / 'miss_company_user.csv', index=False)
 
 
 def combine_company_and_address(company_file, address_file):
@@ -227,7 +229,6 @@ def combine_company_and_address(company_file, address_file):
 
     df_company = pd.read_csv(company_file_obj, encoding='cp1252')
     df_address = pd.read_csv(address_file_obj, encoding='cp1252')
-
 
     company_list_map = {}
     for index, row in df_company.iterrows():
@@ -242,11 +243,14 @@ def combine_company_and_address(company_file, address_file):
             missing_company_address.append(index)
         else:
             company_row = company_list_map[company_external_id]
-            df_address.loc[index, 'Customer Group ID (Required)'] = str(company_row['Customer Group ID (Optional)'])
+            df_address.loc[index, 'Customer Group ID (Required)'] = str(
+                company_row['Customer Group ID (Optional)'])
             address_list.append(index)
 
-    df_address.iloc[address_list].to_csv(file_dir / 'new_address.csv', index=False)
-    df_address.iloc[missing_company_address].to_csv(file_dir / 'miss_company_address.csv', index=False)
+    df_address.iloc[address_list].to_csv(
+        file_dir / 'new_address.csv', index=False)
+    df_address.iloc[missing_company_address].to_csv(
+        file_dir / 'miss_company_address.csv', index=False)
 
 
 def split_duplicate_data(file_path, colum_name="Company User Email (Required)"):
@@ -261,7 +265,8 @@ def split_duplicate_data(file_path, colum_name="Company User Email (Required)"):
     df_no_duplicate = df[~df.duplicated(subset=[colum_name], keep=False)]
 
     df_duplicate.to_csv(file_dir / f'{file_name}-duplicate.csv', index=False)
-    df_no_duplicate.to_csv(file_dir / f'{file_name}-no-duplicate.csv', index=False)
+    df_no_duplicate.to_csv(
+        file_dir / f'{file_name}-no-duplicate.csv', index=False)
 
 
 def merge_two_file(file_a, file_b):
@@ -283,10 +288,10 @@ def filter_file_by_column(file_a, file_b, column_name="Company Status"):
 
     df_a = pd.read_csv(file_a_obj, encoding='cp1252')
     df_b = pd.read_csv(file_b_obj, encoding='cp1252')
- 
+
     # get rows if  column value equal AAA
     df_a = df_a[df_a[column_name] == 'INACTIVE']
-    # get all id in df_a    
+    # get all id in df_a
     id_list = df_a['Customer Group ID (Optional)'].tolist()
     # get rows if id in df_b
     df_b = df_b[df_b['Customer Group ID (Optional)'].isin(id_list)]
@@ -294,22 +299,43 @@ def filter_file_by_column(file_a, file_b, column_name="Company Status"):
     # to csv
     df_b.to_csv(file_dir / 'qqqqqqqqqq.csv', index=False)
 
-def translate_file(file, words_map_file, lang='nl'):
+
+def translate_file(file, words_map_file, *langs):
 
     file_path = pathlib.Path(pathlib.Path(file).resolve())
     file_dir = file_path.parent.parent
     file_name = file_path.name
 
     words_map_path = pathlib.Path(words_map_file)
-    file_content = open(file_path, 'r', encoding='utf-8').read()
     df = pd.read_excel(words_map_path)
 
-    for index, row in df.iterrows():
-        file_content = file_content.replace(row['en'], row[lang])
-    new_file_path = file_dir / lang / file_name
-    print(new_file_path)
-    with open(new_file_path, 'w', encoding='utf-8') as f:
-        f.write(file_content)
+    for lang in langs:
+        file_content = open(file_path, 'r', encoding='utf-8').read()
+        for index, row in df.iterrows():
+            if pd.isnull(row[lang]):
+                continue
+            file_content = file_content.replace(row['en'], row[lang])
+        new_file_path = file_dir / lang / file_name
+        print(new_file_path)
+        with open(new_file_path, 'w', encoding='utf-8') as f:
+            f.write(file_content)
+
+
+def combine_files(column, *files):
+    df = pd.DataFrame()
+    for file in files:
+        file_path = pathlib.Path(pathlib.Path(file).resolve())
+        file_dir = file_path.parent
+        tmp_df = pd.read_excel(file_path)
+        if df.empty:
+            df = tmp_df
+            continue
+        df = pd.merge(df, tmp_df, on=column, how='outer')
+    if not df.empty:
+        new_file_path = file_dir / f"merged-file-{time.time()}.xlsx"
+        df.to_excel(new_file_path, index=False)
+    else:
+        print("No files")
 
 
 def open_file_test(file_path='/mnt/data/test/tmp2.py'):
