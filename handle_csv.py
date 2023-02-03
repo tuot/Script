@@ -312,9 +312,8 @@ def translate_file(file, words_map_file, *langs):
     for lang in langs:
         file_content = open(file_path, 'r', encoding='utf-8').read()
         for index, row in df.iterrows():
-            if pd.isnull(row[lang]):
-                continue
-            file_content = file_content.replace(row['en'], row[lang])
+            if row['en'] in file_content:
+                file_content = file_content.replace(row['en'], row[lang])
         new_file_path = file_dir / lang / file_name
         print(new_file_path)
         with open(new_file_path, 'w', encoding='utf-8') as f:
