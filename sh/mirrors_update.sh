@@ -77,19 +77,20 @@ setDebian(){
 
 	[ -f /etc/apt/sources.list ] && rm /etc/apt/sources.list
 	
-	echo "deb http://cdn-fastly.deb.debian.org/debian/ jessie main non-free contrib" >>/etc/apt/sources.list
-	echo "deb http://cdn-fastly.deb.debian.org/debian/ jessie-updates main non-free contrib" >>/etc/apt/sources.list
-	echo "deb http://cdn-fastly.deb.debian.org/debian/ jessie-backports main non-free contrib" >>/etc/apt/sources.list
-	echo "deb-src http://cdn-fastly.deb.debian.org/debian/ jessie main non-free contrib" >>/etc/apt/sources.list
-	echo "deb-src http://cdn-fastly.deb.debian.org/debian/ jessie-updates main non-free contrib" >>/etc/apt/sources.list
-	echo "deb-src http://cdn-fastly.deb.debian.org/debian/ jessie-backports main non-free contrib" >>/etc/apt/sources.list
+	echo "deb https://cdn-fastly.deb.debian.org/debian/ jessie main non-free contrib" >>/etc/apt/sources.list
+	echo "deb https://cdn-fastly.deb.debian.org/debian/ jessie-updates main non-free contrib" >>/etc/apt/sources.list
+	echo "deb https://cdn-fastly.deb.debian.org/debian/ jessie-backports main non-free contrib" >>/etc/apt/sources.list
+	echo "deb-src https://cdn-fastly.deb.debian.org/debian/ jessie main non-free contrib" >>/etc/apt/sources.list
+	echo "deb-src https://cdn-fastly.deb.debian.org/debian/ jessie-updates main non-free contrib" >>/etc/apt/sources.list
+	echo "deb-src https://cdn-fastly.deb.debian.org/debian/ jessie-backports main non-free contrib" >>/etc/apt/sources.list
 
-    if [ "$debianVersion" == '11' ]; then
-        echo "deb http://cdn-fastly.deb.debian.org/debian-security/ jessie-security main non-free contrib" >>/etc/apt/sources.list
-        echo "deb-src http://cdn-fastly.deb.debian.org/debian-security/ jessie-security main non-free contrib" >>/etc/apt/sources.list
+	versions=("11" "12")
+    if [[ "${versions[*]}" =~ ${debianVersion} ]]; then
+        echo "deb https://cdn-fastly.deb.debian.org/debian-security/ jessie-security main non-free contrib" >>/etc/apt/sources.list
+        echo "deb-src https://cdn-fastly.deb.debian.org/debian-security/ jessie-security main non-free contrib" >>/etc/apt/sources.list
     else
-        echo "deb http://cdn-fastly.deb.debian.org/debian-security/ jessie/updates main non-free contrib" >>/etc/apt/sources.list
-        echo "deb-src http://cdn-fastly.deb.debian.org/debian-security/ jessie/updates main non-free contrib" >>/etc/apt/sources.list
+        echo "deb https://cdn-fastly.deb.debian.org/debian-security/ jessie/updates main non-free contrib" >>/etc/apt/sources.list
+        echo "deb-src https://cdn-fastly.deb.debian.org/debian-security/ jessie/updates main non-free contrib" >>/etc/apt/sources.list
     fi
 
 	[ "$debianVersion" == '7' ] && sed -i 's/jessie/wheezy/'g /etc/apt/sources.list
@@ -97,6 +98,7 @@ setDebian(){
 	[ "$debianVersion" == '9' ] && sed -i 's/jessie/stretch/'g /etc/apt/sources.list
 	[ "$debianVersion" == '10' ] && sed -i 's/jessie/buster/'g /etc/apt/sources.list
 	[ "$debianVersion" == '11' ] && sed -i 's/jessie/bullseye/'g /etc/apt/sources.list
+	[ "$debianVersion" == '12' ] && sed -i 's/jessie/bookworm/'g /etc/apt/sources.list
 }
 
 setUbuntu(){
@@ -108,14 +110,14 @@ setUbuntu(){
 
 	[ -f /etc/apt/sources.list ] && rm /etc/apt/sources.list
 
-	echo "deb http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >>/etc/apt/sources.list
-	echo "deb-src http://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb https://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb https://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb https://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb https://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb-src https://mirrors.aliyun.com/ubuntu/ xenial main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb-src https://mirrors.aliyun.com/ubuntu/ xenial-security main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb-src https://mirrors.aliyun.com/ubuntu/ xenial-updates main restricted universe multiverse" >>/etc/apt/sources.list
+	echo "deb-src https://mirrors.aliyun.com/ubuntu/ xenial-backports main restricted universe multiverse" >>/etc/apt/sources.list
 
 	[ "$ubuntuVersion" == '14.04' ] && sed -i 's/xenial/trusty/'g /etc/apt/sources.list
 	[ "$ubuntuVersion" == '16.06' ] && echo -n ""
@@ -125,6 +127,7 @@ setUbuntu(){
 	[ "$ubuntuVersion" == '20.04' ] && sed -i 's/xenial/focal/'g /etc/apt/sources.list
 	[ "$ubuntuVersion" == '20.10' ] && sed -i 's/xenial/groovy/'g /etc/apt/sources.list
 	[ "$ubuntuVersion" == '21.04' ] && sed -i 's/xenial/hirsute/'g /etc/apt/sources.list
+	[ "$ubuntuVersion" == '22.04' ] && sed -i 's/xenial/jammy/'g /etc/apt/sources.list
 }
 
 setCentos(){
@@ -136,10 +139,10 @@ setCentos(){
 
 	[ -f /etc/yum.repos.d/CentOS-Base.repo ] && rm /etc/yum.repos.d/CentOS-Base.repo
 
-	[ "$centosVersion" == '5' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-5.repo
-	[ "$centosVersion" == '6' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo
-	[ "$centosVersion" == '7' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-	[ "$centosVersion" == '8' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-8.repo
+	[ "$centosVersion" == '5' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-5.repo
+	[ "$centosVersion" == '6' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-6.repo
+	[ "$centosVersion" == '7' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-7.repo
+	[ "$centosVersion" == '8' ] && wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
 }
 
 setAWS(){
