@@ -5,20 +5,29 @@ set -eu
 export MSYS_NO_PATHCONV=1
 
 # check if enter file name and common name
-if [ $# -ne 2 ]; then
-    echo "Usage: $0 <file name> <common name>"
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <app name>"
     exit 1
 fi
 
-FILE_NAME="${1}"
-COMMON_NAME="${2}"
+APP_NAME="${1}"
+DAYS=3650
 
-openssl req -out "${FILE_NAME}"_ca.pem -new -x509 -nodes -days 3650 \
-    -subj "/C=/ST=/L=/O=/OU=/CN=${COMMON_NAME}/emailAddress="
-mv privkey.pem "${FILE_NAME}"_privkey.pem
+CA_KEY=CA.key
+CA_CERT=CA.cert
 
-echo "00" > "${FILE_NAME}"_index.txt
-openssl genrsa -out "${FILE_NAME}".key 2048
-openssl req -key "${FILE_NAME}".key -new -out "${FILE_NAME}".req \
-    -subj "/C=/ST=/L=/O=/OU=/CN=${COMMON_NAME}App/emailAddress="
-openssl x509 -req -in "${FILE_NAME}".req -CA "${FILE_NAME}"_ca.pem -CAkey "${FILE_NAME}"_privkey.pem -CAserial "${FILE_NAME}"_index.txt -out "${FILE_NAME}".pem -days 3650
+CA_INDEX=serial
+
+APP_KEY="${APP_NAME}".key
+APP_REQ="${APP_NAME}".req
+APP_CERT="${APP_NAME}".cert
+
+echo "00" >${CA_INDEX}
+
+openssl genrsa -out ${CA_KEY} 4096
+openssl req -key ${CA_KEY} -out ${CA_CERT} -new -x509 -nodes -days ${DAYS} -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME} CA/emailAddress="
+
+openssl genrsa -out "${APP_KEY}" 2048
+openssl req -key "${APP_KEY}" -new -out "${APP_REQ}" -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME} App/emailAddress="
+
+openssl x509 -req -in "${APP_REQ}" -CA ${CA_CERT} -CAkey ${CA_KEY} -CAserial ${CA_INDEX} -out "${APP_CERT}" -days ${DAYS}
