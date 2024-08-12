@@ -22,12 +22,16 @@ APP_KEY="${APP_NAME}".key
 APP_REQ="${APP_NAME}".req
 APP_CERT="${APP_NAME}".cert
 
+
+mkdir -p cert
+cd cert
+
 echo "00" >${CA_INDEX}
 
 openssl genrsa -out ${CA_KEY} 4096
 openssl req -key ${CA_KEY} -out ${CA_CERT} -new -x509 -nodes -days ${DAYS} -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME} CA/emailAddress="
 
 openssl genrsa -out "${APP_KEY}" 2048
-openssl req -key "${APP_KEY}" -new -out "${APP_REQ}" -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME} App/emailAddress="
+openssl req -key "${APP_KEY}" -new -out "${APP_REQ}" -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME}/emailAddress="
 
 openssl x509 -req -in "${APP_REQ}" -CA ${CA_CERT} -CAkey ${CA_KEY} -CAserial ${CA_INDEX} -out "${APP_CERT}" -days ${DAYS}

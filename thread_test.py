@@ -82,7 +82,7 @@ async def test_coroutine2():
             result = await future
             res.append(result)
         except Exception as e:
-            print(f'{e} happened while processing')
+            print(e)
 
     return res
 
@@ -97,8 +97,9 @@ def test_async_io2():
     res = asyncio.run(test_coroutine2())
 
 
-test_thread()
-test_thread2()
-# test_process()
-# test_async_io()
-# test_async_io2()
+if __name__ == '__main__':
+    test_thread()
+    test_thread2()
+    test_process()
+    test_async_io()
+    test_async_io2()
