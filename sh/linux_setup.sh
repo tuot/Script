@@ -29,7 +29,8 @@ install_docker() {
     INFO "Install docker"
 
     if [ "$(dpkg --list | grep -c docker-ce)" -eq 0 ]; then
-        curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+        # curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+        curl -fsSL https://get.docker.com | bash -s docker 
 
         sudo mkdir -p /etc/docker
         sudo tee /etc/docker/daemon.json <<-EOF
@@ -264,7 +265,7 @@ main() {
     INFO "Start setup"
 
     common_config
-    config_mirrors
+    # config_mirrors
     config_mount
 
     INFO "Install packages"
