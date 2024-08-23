@@ -30,15 +30,18 @@ install_docker() {
 
     if [ "$(dpkg --list | grep -c docker-ce)" -eq 0 ]; then
         # curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
-        curl -fsSL https://get.docker.com | bash -s docker 
+        curl -fsSL https://get.docker.com | bash
 
         sudo mkdir -p /etc/docker
         sudo tee /etc/docker/daemon.json <<-EOF
 {
     "registry-mirrors": [
-        "https://oq1auek6.mirror.aliyuncs.com",
-        "https://hub-mirror.c.163.com",
-        "https://mirror.baidubce.com"
+        "https://dockerhub.icu",
+        "https://docker.chenby.cn",
+        "https://docker.1panel.live",
+        "https://docker.awsl9527.cn",
+        "https://docker.anyhub.us.kg",
+        "https://dhub.kubesre.xyz"
     ],
     "insecure-registries": [
         "192.168.1.229"
