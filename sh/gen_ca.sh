@@ -22,14 +22,16 @@ APP_KEY="${APP_NAME}".key
 APP_REQ="${APP_NAME}".req
 APP_CERT="${APP_NAME}".cert
 
-
 mkdir -p cert
 cd cert
 
-echo "00" >${CA_INDEX}
+# if not exist CA
+if [ ! -f ${CA_CERT} ]; then
+    echo "00" >${CA_INDEX}
 
-openssl genrsa -out ${CA_KEY} 4096
-openssl req -key ${CA_KEY} -out ${CA_CERT} -new -x509 -nodes -days ${DAYS} -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME} CA/emailAddress="
+    openssl genrsa -out ${CA_KEY} 4096
+    openssl req -key ${CA_KEY} -out ${CA_CERT} -new -x509 -nodes -days ${DAYS} -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME} CA/emailAddress="
+fi
 
 openssl genrsa -out "${APP_KEY}" 2048
 openssl req -key "${APP_KEY}" -new -out "${APP_REQ}" -subj "/C=/ST=/L=/O=/OU=/CN=${APP_NAME}/emailAddress="
