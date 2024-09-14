@@ -79,14 +79,11 @@ install_zsh() {
     sudo apt install -y zsh
 
     zsh="$(which zsh)"
-    sudo chsh -s "$zsh" "$USER"
+    chsh -s "$zsh" "$USER"
     export SHELL="$zsh"
 
     if [ ! -d "${HOME}/.oh-my-zsh/lib/" ]; then
-        if [ ! -f "ohmyzsh_install.sh" ]; then
-            curl -fsSL -o ohmyzsh_install.sh https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-        fi
-        sh ohmyzsh_install.sh --unattended
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
     fi
 
     if [ ! -d "${HOME}/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
@@ -275,12 +272,12 @@ main() {
     sudo apt update &&
         sudo apt install -y vim git wget curl
 
-    config_network
+    # config_network
     install_docker
     install_zsh
-    install_tmux
+    # install_tmux
     install_miniconda
-    pip_setup
+    # pip_setup
 
     INFO "Completed........."
 }
