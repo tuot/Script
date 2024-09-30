@@ -36,12 +36,9 @@ install_docker() {
         sudo tee /etc/docker/daemon.json <<-EOF
 {
     "registry-mirrors": [
-        "https://dockerhub.icu",
-        "https://docker.chenby.cn",
-        "https://docker.1panel.live",
-        "https://docker.awsl9527.cn",
-        "https://docker.anyhub.us.kg",
-        "https://dhub.kubesre.xyz"
+        "https://docker.m.daocloud.io",
+        "https://dockerproxy.cn",
+        "https://docker.1panel.live"
     ],
     "insecure-registries": [
         "192.168.1.229"
